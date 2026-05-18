@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: transparent;
+  color: #1d1d1f;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+.drag-region {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+textarea,
+select {
+  outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #0a84ff;
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.22);
+}
+
+.row-hover:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.row-selected {
+  background-color: #0a84ff;
+  color: #fff;
+}
+.row-selected .text-text-secondary,
+.row-selected .text-text-muted {
+  color: rgba(255, 255, 255, 0.85);
+}
+.row-selected:hover {
+  background-color: #0a84ff;
+}
+
+.sidebar-vibrancy {
+  background-color: rgba(232, 232, 234, 0.7);
+}
+
+.sidebar-item-active {
+  background-color: #0a84ff;
+  color: #fff;
+}
+.sidebar-item-active .sidebar-item-sub {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+kbd {
+  font-family: SF Mono, Menlo, monospace;
+  background: #f0f0f2;
+  border: 1px solid #d1d1d3;
+  border-bottom-width: 1.5px;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+  color: #4a4a4d;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-top-color: #0a84ff;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.drop-target {
+  outline: 2px dashed #0a84ff;
+  outline-offset: -6px;
+  background: rgba(10, 132, 255, 0.06);
+}
+
+.titlebar-pad {
+  /* leaves room for the macOS traffic lights when titleBarStyle is hiddenInset */
+  padding-left: 78px;
+}

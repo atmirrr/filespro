@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5BA3FF"/>
+      <stop offset="0.55" stop-color="#3478F6"/>
+      <stop offset="1" stop-color="#1F66E0"/>
+    </linearGradient>
+    <linearGradient id="folderBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E8EEF7"/>
+    </linearGradient>
+    <linearGradient id="folderTab" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#DDE6F1"/>
+      <stop offset="1" stop-color="#B7C6DB"/>
+    </linearGradient>
+    <filter id="folderShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="22" stdDeviation="34" flood-color="#0A1E45" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- macOS squircle (~22% radius) -->
+  <rect x="0" y="0" width="1024" height="1024" rx="228" ry="228" fill="url(#bg)"/>
+
+  <!-- Subtle inner hairline highlight, very macOS -->
+  <rect x="4" y="4" width="1016" height="1016" rx="226" ry="226"
+        fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
+
+  <!-- Folder, centered -->
+  <g filter="url(#folderShadow)">
+    <!-- Back tab -->
+    <path d="M 232 332
+             a 36 36 0 0 1 36 -36
+             h 196
+             a 36 36 0 0 1 25.5 10.5
+             l 64 64
+             a 36 36 0 0 0 25.5 10.5
+             h 184
+             a 36 36 0 0 1 36 36
+             v 80
+             H 232 Z"
+          fill="url(#folderTab)"/>
+
+    <!-- Body -->
+    <rect x="200" y="392" width="624" height="400" rx="44" ry="44" fill="url(#folderBody)"/>
+  </g>
+
+  <!-- Soft paper-stack hint inside the folder body -->
+  <rect x="248" y="430" width="528" height="6" rx="3" fill="#D4DDEC" opacity="0.55"/>
+  <rect x="280" y="452" width="464" height="6" rx="3" fill="#D4DDEC" opacity="0.35"/>
+</svg>

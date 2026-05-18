@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>FilesPro</title>
+    <meta
+      name="description"
+      content="A native Mac file manager for your local folders and 18 cloud storage providers. Free and open source."
+    />
+    <link rel="icon" type="image/png" href="./icon.png" />
+    <meta property="og:title" content="FilesPro" />
+    <meta
+      property="og:description"
+      content="Your S3, R2, GCS, Drive, Dropbox and 14 more, in one native Mac app."
+    />
+    <meta property="og:image" content="./icon.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Helvetica Neue", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      html, body { height: 100%; }
+      body {
+        background: #ffffff;
+        color: #1d1d1f;
+      }
+      .muted { color: #4a4a4d; }
+      .quiet { color: #8a8a8e; }
+      .btn-primary {
+        background: #0a84ff;
+        color: #ffffff;
+        transition: background 120ms ease, transform 120ms ease;
+      }
+      .btn-primary:hover { background: #006ee6; }
+      .btn-primary:active { transform: translateY(1px); }
+      .btn-ghost {
+        background: transparent;
+        color: #1d1d1f;
+        border: 1px solid #e1e1e3;
+        transition: background 120ms ease, border-color 120ms ease;
+      }
+      .btn-ghost:hover { background: #f6f6f6; }
+      @media (prefers-color-scheme: dark) {
+        body { background: #0f0f10; color: #f5f5f7; }
+        .muted { color: #c3c3c7; }
+        .quiet { color: #8a8a8e; }
+        .btn-ghost { color: #f5f5f7; border-color: #2a2a2c; }
+        .btn-ghost:hover { background: #1a1a1c; }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex items-center justify-center px-6">
+    <main class="text-center max-w-xl w-full">
+      <img
+        src="./icon.png"
+        alt=""
+        width="96"
+        height="96"
+        class="mx-auto mb-7 rounded-[22px] shadow-[0_18px_48px_-12px_rgba(10,30,69,0.35)]"
+      />
+
+      <h1 class="text-5xl sm:text-6xl font-semibold tracking-tight">FilesPro</h1>
+
+      <p class="mt-4 text-[17px] sm:text-[19px] leading-relaxed muted">
+        Your S3, R2, GCS, Dropbox, Drive, and 14 more,
+        <br class="hidden sm:block" />
+        in one native Mac app.
+      </p>
+
+      <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a
+          href="https://github.com/atmirrr/filespro/releases/latest/download/FilesPro-0.1.0-arm64.dmg"
+          class="btn-primary inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-[14px] font-medium w-full sm:w-auto"
+        >
+          Download for Mac
+        </a>
+        <a
+          href="https://github.com/atmirrr/filespro"
+          class="btn-ghost inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-[14px] font-medium w-full sm:w-auto"
+        >
+          View on GitHub
+        </a>
+      </div>
+
+      <p class="mt-5 text-[12px] quiet">
+        Apple Silicon, 121 MB. Free. Open source. MIT licensed.
+      </p>
+    </main>
+  </body>
+</html>
