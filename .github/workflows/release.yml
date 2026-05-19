@@ -11,16 +11,10 @@ permissions:
 
 jobs:
   build:
-    name: Build (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: macos-14
-            arch: arm64
-          - runner: macos-13
-            arch: x64
+    # Apple Silicon only for now. macos-13 (Intel) runners are deeply
+    # backlogged on GitHub-hosted; revisit when we add x64 in a later version.
+    name: Build (arm64)
+    runs-on: macos-14
 
     steps:
       - name: Checkout
@@ -38,20 +32,20 @@ jobs:
       - name: Build renderer + main
         run: ./node_modules/.bin/electron-vite build
 
-      - name: Package DMG (${{ matrix.arch }})
+      - name: Package DMG (arm64)
         env:
           # Code signing is disabled for now (identity: null in package.json).
           # Once Apple Developer ID is set up, expose CSC_LINK + CSC_KEY_PASSWORD here.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./node_modules/.bin/electron-builder --mac --${{ matrix.arch }}
+        run: ./node_modules/.bin/electron-builder --mac --arm64
 
       - name: List artifacts
         run: ls -lh release/
 
-      - name: Upload DMG to workflow run (debug)
+      - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
         with:
-          name: filespro-${{ matrix.arch }}-dmg
+          name: filespro-arm64-dmg
           path: |
             release/*.dmg
             release/*.dmg.blockmap
@@ -70,12 +64,6 @@ jobs:
           name: filespro-arm64-dmg
           path: dist/arm64
 
-      - name: Download x64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: filespro-x64-dmg
-          path: dist/x64
-
       - name: Create / update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -87,5 +75,3 @@ jobs:
           files: |
             dist/arm64/*.dmg
             dist/arm64/*.dmg.blockmap
-            dist/x64/*.dmg
-            dist/x64/*.dmg.blockmap
