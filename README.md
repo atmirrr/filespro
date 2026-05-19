@@ -4,7 +4,7 @@
 
 A Finder-style macOS file manager that connects to your local folders and 18 cloud storage providers. Drag a file from Desktop into an S3 bucket, copy from Dropbox to R2, peek at a PDF in a Supabase bucket with Quick Look. All in one window.
 
-![FilesPro home view](./landing/screenshots/home.png)
+![FilesPro home view](./docs/screenshots/home.png)
 
 ## Supported sources
 
