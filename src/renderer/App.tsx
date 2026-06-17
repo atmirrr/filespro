@@ -6,6 +6,7 @@ import { HomeView } from "./components/HomeView";
 import { ConnectionEditor } from "./components/ConnectionEditor";
 import { ToastsProvider, useToasts } from "./components/Toasts";
 import { TransferDock, type TransferItem } from "./components/TransferDock";
+import { friendlyError } from "./lib/errors";
 
 function FilesApp() {
   const [connections, setConnections] = useState<ConnectionConfig[]>([]);

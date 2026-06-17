@@ -178,7 +178,7 @@ export function HomeView({ connections, onOpen, onNew, onEdit, onDelete }: Props
             </div>
             <div className="text-[15px] font-medium text-text-primary">No sources yet</div>
             <div className="text-[13px] text-text-secondary mt-1 max-w-sm">
-              Add a local folder, an S3 bucket, Google Drive, or any of 18 supported storage services.
+              Add a local folder, an S3 bucket, Google Drive, or any of 30+ supported storage services.
             </div>
             <button
               onClick={onNew}

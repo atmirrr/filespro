@@ -27,6 +27,9 @@ const api = {
     thumbUrl: (id: string, key: string) => ipcRenderer.invoke("fs:thumbUrl", id, key),
     readTextPreview: (id: string, key: string, maxBytes?: number) =>
       ipcRenderer.invoke("fs:readTextPreview", id, key, maxBytes),
+    capabilities: (id: string) => ipcRenderer.invoke("fs:capabilities", id),
+    downloadZip: (id: string, prefix: string, destPath: string) =>
+      ipcRenderer.invoke("fs:downloadZip", id, prefix, destPath),
   },
   dialog: {
     pickFiles: () => ipcRenderer.invoke("dialog:pickFiles"),

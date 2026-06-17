@@ -20,6 +20,8 @@ import {
   testConnection,
   thumbUrl,
   readTextPreview,
+  capabilities,
+  downloadZipFolder,
 } from "./fileops.js";
 import type { ConnectionConfig } from "../shared/types.js";
 
@@ -43,8 +45,6 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
-    x: offset > 0 ? undefined : undefined,
-    y: offset > 0 ? undefined : undefined,
     minWidth: 880,
     minHeight: 560,
     titleBarStyle: "hiddenInset",
@@ -200,6 +200,10 @@ function registerIpc() {
   ipcMain.handle("fs:thumbUrl", (_e, id: string, key: string) => wrap(() => thumbUrl(id, key)));
   ipcMain.handle("fs:readTextPreview", (_e, id: string, key: string, maxBytes?: number) =>
     wrap(() => readTextPreview(id, key, maxBytes)),
+  );
+  ipcMain.handle("fs:capabilities", (_e, id: string) => wrap(() => capabilities(id)));
+  ipcMain.handle("fs:downloadZip", (_e, id: string, prefix: string, destPath: string) =>
+    wrap(() => downloadZipFolder(id, prefix, destPath)),
   );
 
   ipcMain.handle("dialog:pickFiles", async () => {

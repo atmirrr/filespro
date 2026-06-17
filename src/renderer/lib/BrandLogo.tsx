@@ -20,6 +20,26 @@ interface BrandSpec {
   glyphOnBadge: "white" | "color";
 }
 
+/** A simple centered monogram glyph, for the S3-compatible providers that
+ *  don't ship a hand-drawn logo. Renders in `currentColor` so it inverts to
+ *  white on a colored badge. */
+function mono(label: string, fontSize = 8.5): React.ReactNode {
+  return (
+    <text
+      x="12"
+      y="12.5"
+      fontFamily="-apple-system, system-ui, sans-serif"
+      fontSize={fontSize}
+      fontWeight={700}
+      textAnchor="middle"
+      dominantBaseline="central"
+      fill="currentColor"
+    >
+      {label}
+    </text>
+  );
+}
+
 const LOGOS: Record<AdapterKind, BrandSpec> = {
   fs: {
     badgeBg: "#3478F6",
@@ -291,6 +311,91 @@ const LOGOS: Record<AdapterKind, BrandSpec> = {
         fill="currentColor"
       />
     ),
+  },
+
+  "backblaze-b2": {
+    badgeBg: "#E21E29",
+    badgeBg2: "#B3161F",
+    glyphOnBadge: "white",
+    glyph: mono("B2"),
+  },
+  wasabi: {
+    badgeBg: "#01CD3E",
+    badgeBg2: "#019E30",
+    glyphOnBadge: "white",
+    glyph: mono("W", 11),
+  },
+  tigris: {
+    badgeBg: "#6B3FA0",
+    badgeBg2: "#4E2D77",
+    glyphOnBadge: "white",
+    glyph: mono("T", 11),
+  },
+  scaleway: {
+    badgeBg: "#4F0599",
+    badgeBg2: "#380370",
+    glyphOnBadge: "white",
+    glyph: mono("S", 11),
+  },
+  vultr: {
+    badgeBg: "#007BFC",
+    badgeBg2: "#005FC4",
+    glyphOnBadge: "white",
+    glyph: mono("V", 11),
+  },
+  ovhcloud: {
+    badgeBg: "#000E9C",
+    badgeBg2: "#000770",
+    glyphOnBadge: "white",
+    glyph: mono("OVH", 6),
+  },
+  "idrive-e2": {
+    badgeBg: "#0066B3",
+    badgeBg2: "#004E8A",
+    glyphOnBadge: "white",
+    glyph: mono("e2"),
+  },
+  filebase: {
+    badgeBg: "#FF5C00",
+    badgeBg2: "#CC4900",
+    glyphOnBadge: "white",
+    glyph: mono("F", 11),
+  },
+  exoscale: {
+    badgeBg: "#DA291C",
+    badgeBg2: "#AC2016",
+    glyphOnBadge: "white",
+    glyph: mono("E", 11),
+  },
+  "oracle-cloud": {
+    badgeBg: "#C74634",
+    badgeBg2: "#9C3728",
+    glyphOnBadge: "white",
+    glyph: mono("OCI", 6),
+  },
+  "ibm-cos": {
+    badgeBg: "#0F62FE",
+    badgeBg2: "#0A4BC4",
+    glyphOnBadge: "white",
+    glyph: mono("IBM", 6),
+  },
+  tencent: {
+    badgeBg: "#006EFF",
+    badgeBg2: "#0056C4",
+    glyphOnBadge: "white",
+    glyph: mono("COS", 5.6),
+  },
+  alibaba: {
+    badgeBg: "#FF6A00",
+    badgeBg2: "#CC5500",
+    glyphOnBadge: "white",
+    glyph: mono("OSS", 5.6),
+  },
+  yandex: {
+    badgeBg: "#FC3F1D",
+    badgeBg2: "#C73217",
+    glyphOnBadge: "white",
+    glyph: mono("Y", 11),
   },
 };
 
