@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ADAPTERS, ConnectionConfig } from "@shared/types";
 import { Plus, Pencil, Trash, Home } from "../lib/icons";
 import { BrandChipInline } from "../lib/BrandLogo";
@@ -50,6 +50,13 @@ export function Sidebar({
   onDropOnSource,
 }: Props) {
   const [dropTarget, setDropTarget] = React.useState<string | null>(null);
+  const [version, setVersion] = useState<string>("");
+  useEffect(() => {
+    window.api.app
+      .version()
+      .then(setVersion)
+      .catch(() => setVersion(""));
+  }, []);
   const grouped = useMemo(() => {
     const groups: Record<string, ConnectionConfig[]> = {};
     for (const c of connections) {
@@ -188,7 +195,7 @@ export function Sidebar({
           <Plus size={13} /> New source
         </button>
         <div className="flex-1" />
-        <span className="text-[10px] text-text-muted pr-1">v0.1.0</span>
+        <span className="text-[10px] text-text-muted pr-1">{version ? `v${version}` : ""}</span>
       </div>
     </aside>
   );

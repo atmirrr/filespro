@@ -1,4 +1,4 @@
-import type { ConnectionConfig, ListResult, RemoteEntry } from "./types";
+import type { ConnectionConfig, ListResult, RemoteEntry, SourceCapabilities } from "./types";
 
 export interface IpcApi {
   connections: {
@@ -38,6 +38,8 @@ export interface IpcApi {
     revealInFinder(path: string): Promise<void>;
     thumbUrl(connectionId: string, key: string): Promise<string | null>;
     readTextPreview(connectionId: string, key: string, maxBytes?: number): Promise<string>;
+    capabilities(connectionId: string): Promise<SourceCapabilities>;
+    downloadZip(connectionId: string, prefix: string, destPath: string): Promise<{ bytes: number }>;
   };
   dialog: {
     pickFiles(): Promise<string[]>;

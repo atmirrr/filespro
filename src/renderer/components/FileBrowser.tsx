@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ConnectionConfig, RemoteEntry } from "@shared/types";
+import type { ConnectionConfig, RemoteEntry, SourceCapabilities } from "@shared/types";
 import {
   Download,
   FileIcon,
@@ -281,7 +281,10 @@ export function FileBrowser({
   }, [sortKey, sortDir]);
   const [previewEntry, setPreviewEntry] = useState<RemoteEntry | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const [caps, setCaps] = useState<SourceCapabilities | null>(null);
   const toasts = useToasts();
+  // Show the "shareable URL" affordances unless the source explicitly can't sign one.
+  const canShareUrl = caps?.signedUrl !== false;
   const containerRef = useRef<HTMLDivElement>(null);
   const copyMenuRef = useRef<HTMLDivElement>(null);
 
@@ -310,6 +313,7 @@ export function FileBrowser({
   );
 
   useEffect(() => {
+    setCaps(null);
     if (connection) {
       setPrefix("");
       setItems([]);
@@ -319,6 +323,18 @@ export function FileBrowser({
       const opts = connection.options as Record<string, unknown> | undefined;
       if (opts && opts._demo === true) return;
       void load("");
+      let cancelled = false;
+      window.api.fs
+        .capabilities(connection.id)
+        .then((c) => {
+          if (!cancelled) setCaps(c);
+        })
+        .catch(() => {
+          /* leave caps null — affordances stay visible */
+        });
+      return () => {
+        cancelled = true;
+      };
     } else {
       setItems([]);
       setSelection(new Set());
@@ -531,6 +547,26 @@ export function FileBrowser({
       }
     }
     await load();
+  }
+
+  async function handleDownloadZip(folderKey: string) {
+    if (!connection) return;
+    const folderName = basename(folderKey) || connection.name;
+    const dest = await window.api.dialog.saveAs(`${folderName}.zip`);
+    if (!dest) return;
+    const id =
+      onTransferStart?.({
+        id: crypto.randomUUID(),
+        label: `Zip ${folderName}`,
+      }) ?? "";
+    try {
+      await window.api.fs.downloadZip(connection.id, folderKey, dest);
+      onTransferDone?.(id);
+      toasts.push(`Zipped ${folderName} → ${dest}`, "success");
+    } catch (e) {
+      onTransferDone?.(id, friendlyError(e));
+      toasts.push(friendlyError(e), "error");
+    }
   }
 
   async function handleMkdir() {
@@ -1021,7 +1057,7 @@ export function FileBrowser({
                         }
                         setContextMenu({ x: e.clientX, y: e.clientY, entry: it });
                       }}
-                      draggable={!it.isDir || true}
+                      draggable
                       onDragStart={(e) => {
                         if (!connection) return;
                         const payload = {
@@ -1070,7 +1106,7 @@ export function FileBrowser({
                         </div>
                       )}
                       <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 flex items-center gap-0.5">
-                        {!it.isDir ? (
+                        {!it.isDir && canShareUrl ? (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1175,7 +1211,7 @@ export function FileBrowser({
                       {formatDate(it.lastModified)}
                     </div>
                     <div className="col-span-1 flex items-center justify-end gap-0.5">
-                      {!it.isDir ? (
+                      {!it.isDir && canShareUrl ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1270,13 +1306,22 @@ export function FileBrowser({
             label={contextMenu.entry.isDir ? "Open Folder" : "Open"}
             shortcut="↵"
           />
-          {!contextMenu.entry.isDir ? (
+          {!contextMenu.entry.isDir && canShareUrl ? (
             <MenuItem
               onClick={() => {
                 void handleGetUrl(contextMenu.entry.key);
                 setContextMenu(null);
               }}
               label="Copy Shareable URL"
+            />
+          ) : null}
+          {contextMenu.entry.isDir ? (
+            <MenuItem
+              onClick={() => {
+                void handleDownloadZip(contextMenu.entry.key);
+                setContextMenu(null);
+              }}
+              label="Download as ZIP"
             />
           ) : null}
           <MenuItem

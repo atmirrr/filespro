@@ -1,14 +1,12 @@
 # FilesPro
 
-> Your S3, R2, Drive, Dropbox and 14 more, in one native Mac app.
+> Your S3, R2, Drive, Dropbox and 30 more, in one native Mac app.
 
-A Finder-style macOS file manager that connects to your local folders and 18 cloud storage providers. Drag a file from Desktop into an S3 bucket, copy from Dropbox to R2, peek at a PDF in a Supabase bucket with Quick Look. All in one window.
-
-![FilesPro home view](./docs/screenshots/home.png)
+A Finder-style macOS file manager that connects to your local folders and 31 cloud storage providers. Drag a file from Desktop into an S3 bucket, copy from Dropbox to R2, download a whole folder as a ZIP, peek at a PDF in a Supabase bucket with Quick Look. All in one window.
 
 ## Supported sources
 
-Local filesystem · Amazon S3 · Cloudflare R2 · Google Cloud Storage · Azure Blob · MinIO · DigitalOcean Spaces · Storj · Hetzner Object Storage · Akamai NetStorage · Vercel Blob · Netlify Blobs · UploadThing · Supabase Storage · Dropbox · OneDrive · Google Drive · Box
+Local filesystem · Amazon S3 · Cloudflare R2 · Google Cloud Storage · Azure Blob · MinIO · DigitalOcean Spaces · Storj · Hetzner Object Storage · Akamai NetStorage · Vercel Blob · Netlify Blobs · UploadThing · Supabase Storage · Dropbox · OneDrive · Google Drive · Box · Backblaze B2 · Wasabi · Tigris · Scaleway · Vultr · OVHcloud · IDrive e2 · Filebase · Exoscale · Oracle Cloud · IBM COS · Tencent COS · Alibaba OSS · Yandex Object Storage
 
 ## Install
 

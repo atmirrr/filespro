@@ -1,11 +1,29 @@
-import { promises as fsp, createWriteStream } from "node:fs";
+import { promises as fsp, createReadStream, createWriteStream } from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { StoredFile } from "files-sdk";
 import { getCachedClient } from "./adapters.js";
 import { getConnection } from "./store.js";
-import type { ConnectionConfig, ListResult, RemoteEntry } from "../shared/types.js";
+import type {
+  ConnectionConfig,
+  ListResult,
+  RemoteEntry,
+  SourceCapabilities,
+} from "../shared/types.js";
+
+/** Cast a Web ReadableStream to whatever `Readable.fromWeb` expects — the DOM
+ *  and `node:stream/web` stream types are structurally identical but nominally
+ *  distinct, so an explicit bridge keeps the call type-safe. */
+function toNodeStream(web: ReadableStream<Uint8Array>): Readable {
+  return Readable.fromWeb(web as unknown as Parameters<typeof Readable.fromWeb>[0]);
+}
+
+/** Bridge a Node read stream to the Web ReadableStream the SDK accepts as a
+ *  body, so uploads stream from disk instead of buffering the whole file. */
+function fileToWebStream(sourcePath: string): ReadableStream<Uint8Array> {
+  return Readable.toWeb(createReadStream(sourcePath)) as unknown as ReadableStream<Uint8Array>;
+}
 
 const PAGE_SIZE = 500;
 
@@ -211,12 +229,7 @@ export async function downloadToFile(
   try {
     const result = await client.download(key, { as: "stream" });
     if (typeof result.stream === "function") {
-      const webStream = result.stream();
-      const nodeStream =
-        webStream instanceof Readable
-          ? webStream
-          : Readable.fromWeb(webStream as unknown as ReadableStream<Uint8Array>);
-      await pipeline(nodeStream, createWriteStream(destPath));
+      await pipeline(toNodeStream(result.stream()), createWriteStream(destPath));
       const stat = await fsp.stat(destPath);
       return { bytes: stat.size };
     }
@@ -237,9 +250,11 @@ export async function uploadLocalFile(
 ): Promise<{ bytes: number }> {
   const config = await getConfig(connectionId);
   const client = await getCachedClient(config);
-  const buf = await fsp.readFile(sourcePath);
-  await client.upload(destKey, buf);
-  return { bytes: buf.byteLength };
+  // Stream from disk rather than reading the whole file into memory — the SDK
+  // promotes S3-family uploads to multipart and buffers generically elsewhere.
+  const { size } = await fsp.stat(sourcePath);
+  await client.upload(destKey, fileToWebStream(sourcePath));
+  return { bytes: size };
 }
 
 export async function deleteEntry(connectionId: string, key: string): Promise<void> {
@@ -250,9 +265,11 @@ export async function deleteEntry(connectionId: string, key: string): Promise<vo
     let cursor: string | undefined;
     do {
       const page = await client.list({ prefix: key, limit: PAGE_SIZE, cursor });
-      for (const it of page.items ?? []) {
-        if (it.key) await client.delete(it.key);
-      }
+      const keys = (page.items ?? [])
+        .map((it) => it.key)
+        .filter((k): k is string => typeof k === "string" && k.length > 0);
+      // One batched delete per page — the SDK fans out with bounded concurrency.
+      if (keys.length > 0) await client.delete(keys);
       cursor = page.cursor;
     } while (cursor);
     return;
@@ -305,19 +322,19 @@ export async function copy(
         if (!it.key) continue;
         const rest = it.key.slice(sourceKey.length);
         const dst = (destKey.endsWith("/") ? destKey : destKey + "/") + rest;
-        const dl = await sourceClient.download(it.key);
-        const buf = await blobToBuffer(await dl.blob());
-        await destClient.upload(dst, buf);
-        totalBytes += buf.byteLength;
+        // Stream straight from source to destination — no full-file buffering.
+        const dl = await sourceClient.download(it.key, { as: "stream" });
+        await destClient.upload(dst, dl.stream());
+        totalBytes += dl.size ?? it.size ?? 0;
       }
       cursor = page.cursor;
     } while (cursor);
     return { bytes: totalBytes };
   }
-  const dl = await sourceClient.download(sourceKey);
-  const buf = await blobToBuffer(await dl.blob());
-  await destClient.upload(destKey, buf);
-  return { bytes: buf.byteLength };
+  const dl = await sourceClient.download(sourceKey, { as: "stream" });
+  const bytes = dl.size ?? 0;
+  await destClient.upload(destKey, dl.stream());
+  return { bytes };
 }
 
 export async function move(
@@ -326,6 +343,13 @@ export async function move(
   destConnectionId: string,
   destKey: string,
 ): Promise<{ bytes: number }> {
+  // Same source + a single object: use the adapter's native move (server-side
+  // rename where supported) instead of copy-then-delete.
+  if (sourceConnectionId === destConnectionId && !sourceKey.endsWith("/")) {
+    const client = await getCachedClient(await getConfig(sourceConnectionId));
+    await client.move(sourceKey, destKey);
+    return { bytes: 0 };
+  }
   const res = await copy(sourceConnectionId, sourceKey, destConnectionId, destKey);
   await deleteEntry(sourceConnectionId, sourceKey);
   return res;
@@ -393,6 +417,50 @@ export async function url(
   } catch {
     return null;
   }
+}
+
+/**
+ * Report what the source's adapter can do, so the renderer can adapt its UI
+ * (e.g. hide "Copy shareable URL" for sources that can't sign one). Best-effort
+ * — any failure resolves to a conservative all-false set.
+ */
+export async function capabilities(connectionId: string): Promise<SourceCapabilities> {
+  try {
+    const config = await getConfig(connectionId);
+    if (config.kind === "fs") return { signedUrl: false, serverSideCopy: false };
+    const client = await getCachedClient(config);
+    const caps = client.capabilities;
+    return {
+      signedUrl: Boolean(caps.signedUrl?.supported),
+      serverSideCopy: Boolean(caps.serverSideCopy),
+    };
+  } catch {
+    return { signedUrl: false, serverSideCopy: false };
+  }
+}
+
+/**
+ * Stream every object under `prefix` into a single ZIP archive written to
+ * `destPath`. Uses the SDK's `zip` plugin, which downloads and deflates one
+ * entry at a time so memory stays flat regardless of folder size.
+ */
+export async function downloadZipFolder(
+  connectionId: string,
+  prefix: string,
+  destPath: string,
+): Promise<{ bytes: number }> {
+  const config = await getConfig(connectionId);
+  const [{ createFiles }, { zip }] = await Promise.all([
+    import("files-sdk"),
+    import("files-sdk/zip"),
+  ]);
+  const base = await getCachedClient(config);
+  const zipper = createFiles({ adapter: base.adapter, plugins: [zip()] });
+  const norm = normalizePrefix(prefix);
+  await fsp.mkdir(path.dirname(destPath), { recursive: true });
+  await pipeline(toNodeStream(zipper.zip({ prefix: norm })), createWriteStream(destPath));
+  const stat = await fsp.stat(destPath);
+  return { bytes: stat.size };
 }
 
 export async function testConnection(config: ConnectionConfig): Promise<{ ok: boolean; error?: string }> {

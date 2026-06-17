@@ -1,7 +1,7 @@
 {
   "name": "filespro",
   "version": "0.1.0",
-  "description": "FilesPro — a native Mac file manager for your local folders and 18 cloud storage providers.",
+  "description": "FilesPro — a native Mac file manager for your local folders and 31 cloud storage providers.",
   "main": "out/main/index.js",
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "smoke": "node scripts/smoke-adapters.mjs",
     "pack": "electron-vite build && electron-builder --dir",
     "dist": "electron-vite build && electron-builder",
     "dist:mac": "electron-vite build && electron-builder --mac --arm64 --x64"
@@ -19,7 +20,24 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "files-sdk": "latest"
+    "files-sdk": "^1.9.0",
+    "@aws-sdk/client-s3": "3.1070.0",
+    "@aws-sdk/lib-storage": "3.1070.0",
+    "@aws-sdk/s3-presigned-post": "3.1070.0",
+    "@aws-sdk/s3-request-presigner": "3.1070.0",
+    "@azure/core-auth": "^1.9.0",
+    "@azure/identity": "^4.5.0",
+    "@azure/storage-blob": "^12.26.0",
+    "@google-cloud/storage": "^7.19.0",
+    "@googleapis/drive": "^20.0.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@netlify/blobs": "^10.7.4",
+    "@supabase/storage-js": "^2.105.4",
+    "@vercel/blob": "^2.4.0",
+    "box-typescript-sdk-gen": "^1.19.1",
+    "dropbox": "^10.34.0",
+    "google-auth-library": "^10.0.0",
+    "uploadthing": "^7"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

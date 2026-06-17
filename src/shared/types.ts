@@ -16,7 +16,21 @@ export type AdapterKind =
   | "dropbox"
   | "onedrive"
   | "google-drive"
-  | "box";
+  | "box"
+  | "backblaze-b2"
+  | "wasabi"
+  | "tigris"
+  | "scaleway"
+  | "vultr"
+  | "ovhcloud"
+  | "idrive-e2"
+  | "filebase"
+  | "exoscale"
+  | "oracle-cloud"
+  | "ibm-cos"
+  | "tencent"
+  | "alibaba"
+  | "yandex";
 
 export interface ConnectionBase {
   id: string;
@@ -43,6 +57,14 @@ export interface ListResult {
   items: RemoteEntry[];
   cursor?: string;
   prefix: string;
+}
+
+/** Subset of the SDK's adapter capabilities the renderer reacts to. */
+export interface SourceCapabilities {
+  /** `true` when `url()` can mint a shareable/signed link for this source. */
+  signedUrl: boolean;
+  /** `true` when the adapter copies server-side without re-transferring bytes. */
+  serverSideCopy: boolean;
 }
 
 export interface TransferProgress {
@@ -74,6 +96,44 @@ export interface AdapterField {
   hint?: string;
   isSecret?: boolean;
   default?: string | number | boolean;
+}
+
+/**
+ * Standard field set for the S3-compatible object stores. They all share the
+ * same shape: a bucket, a region that drives the endpoint, and a top-level
+ * access-key pair. `endpoint` is offered as an optional override for the
+ * providers whose default host can vary.
+ */
+function s3Fields(opts?: {
+  regionRequired?: boolean;
+  regionPlaceholder?: string;
+  endpointHint?: string;
+  bucketLabel?: string;
+}): AdapterField[] {
+  return [
+    { name: "bucket", label: opts?.bucketLabel ?? "Bucket", type: "text", required: true },
+    {
+      name: "region",
+      label: "Region",
+      type: "text",
+      required: opts?.regionRequired ?? true,
+      placeholder: opts?.regionPlaceholder,
+    },
+    { name: "accessKeyId", label: "Access Key ID", type: "text", required: true, isSecret: true },
+    {
+      name: "secretAccessKey",
+      label: "Secret Access Key",
+      type: "password",
+      required: true,
+      isSecret: true,
+    },
+    {
+      name: "endpoint",
+      label: "Endpoint (optional)",
+      type: "text",
+      hint: opts?.endpointHint,
+    },
+  ];
 }
 
 export const ADAPTERS: AdapterDescriptor[] = [
@@ -345,6 +405,106 @@ export const ADAPTERS: AdapterDescriptor[] = [
         isSecret: true,
       },
     ],
+  },
+  {
+    kind: "backblaze-b2",
+    label: "Backblaze B2",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "us-west-004" }),
+  },
+  {
+    kind: "wasabi",
+    label: "Wasabi",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "us-east-1" }),
+  },
+  {
+    kind: "tigris",
+    label: "Tigris",
+    category: "Object",
+    fields: s3Fields({
+      regionRequired: false,
+      regionPlaceholder: "auto",
+      endpointHint: "Defaults to https://fly.storage.tigris.dev",
+    }),
+  },
+  {
+    kind: "scaleway",
+    label: "Scaleway",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "fr-par" }),
+  },
+  {
+    kind: "vultr",
+    label: "Vultr Object Storage",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "ewr" }),
+  },
+  {
+    kind: "ovhcloud",
+    label: "OVHcloud",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "gra" }),
+  },
+  {
+    kind: "idrive-e2",
+    label: "IDrive e2",
+    category: "Object",
+    fields: s3Fields({
+      regionPlaceholder: "us-west-1",
+      endpointHint: "Your region endpoint, e.g. https://q9o2.la.idrivee2-optional.com",
+    }),
+  },
+  {
+    kind: "filebase",
+    label: "Filebase",
+    category: "Object",
+    fields: s3Fields({
+      regionPlaceholder: "us-east-1",
+      endpointHint: "Defaults to https://s3.filebase.com",
+    }),
+  },
+  {
+    kind: "exoscale",
+    label: "Exoscale",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "ch-gva-2" }),
+  },
+  {
+    kind: "oracle-cloud",
+    label: "Oracle Cloud (OCI)",
+    category: "Object",
+    fields: s3Fields({
+      regionPlaceholder: "us-ashburn-1",
+      endpointHint: "https://<namespace>.compat.objectstorage.<region>.oraclecloud.com",
+    }),
+  },
+  {
+    kind: "ibm-cos",
+    label: "IBM Cloud Object Storage",
+    category: "Object",
+    fields: s3Fields({
+      regionPlaceholder: "us-south",
+      endpointHint: "e.g. https://s3.us-south.cloud-object-storage.appdomain.cloud",
+    }),
+  },
+  {
+    kind: "tencent",
+    label: "Tencent COS",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "ap-guangzhou" }),
+  },
+  {
+    kind: "alibaba",
+    label: "Alibaba OSS",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "oss-cn-hangzhou" }),
+  },
+  {
+    kind: "yandex",
+    label: "Yandex Object Storage",
+    category: "Object",
+    fields: s3Fields({ regionPlaceholder: "ru-central1" }),
   },
 ];
 
