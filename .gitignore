@@ -3,9 +3,10 @@ out
 release
 dist
 
-# Not committed: provider SDKs are optional peer deps and the AWS SDK family is
-# pinned to exact, lockstep versions in package.json, so `npm install` resolves
-# deterministically without a lockfile.
+# Not committed: provider SDKs are optional peer deps (whose transitive versions
+# make an npm-install-generated lockfile fail `npm ci`), and the AWS SDK family
+# is pinned to exact lockstep versions in package.json, so `npm install`
+# resolves deterministically without a committed lockfile.
 package-lock.json
 
 # Editor + OS noise
